@@ -1,0 +1,60 @@
+.icon svg {
+    width: 24px;
+    height: 24px;
+    fill: #ffff;
+}
+
+.wrapper * {
+    display: flex;
+    align-items: center;
+}
+
+.wrapper:hover {
+    box-shadow: 0 15px 40px -8px rgba(158, 97, 255, 0.5);
+    transform: translateY(-3px);
+}
+
+.wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 10px;
+    color: #fff;
+    background: linear-gradient(
+            248.28deg,
+            #9e61ff 9.54%,
+            rgba(142, 97, 255, 0) 32.8%
+        ),
+        radial-gradient(
+            81.71% 279.87% at -16.57% -92%,
+            #619bff 28.69%,
+            rgba(205, 219, 248, 0) 69.54%
+        ),
+        #6c52ee;
+    padding: 1rem 2rem;
+    font-weight: 700;
+    font-size: 1rem;
+    position: relative;
+    transition: 0.2s ease;
+}
+
+.wrapper:hover .animationIcon > svg {
+    position: relative;
+    animation-name: hoverIcon;
+    animation-duration: 0.5s;
+}
+
+@keyframes hoverIcon {
+    50% {
+        transform: translateX(20px);
+        opacity: 0;
+    }
+    50.01% {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}

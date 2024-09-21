@@ -1,0 +1,68 @@
+.wrapper {
+    width: 280px;
+}
+
+.preview {
+    width: 280px;
+    height: 183px;
+    background: red;
+    border-radius: 5px;
+}
+
+.title {
+    margin-top: 20px;
+    font-style: 1rem;
+    color: #fff;
+    font-weight: 700;
+}
+
+.details {
+    margin-top: 10px;
+    display: flex;
+}
+
+.duration::before,
+.restriction::before {
+    content: '';
+    display: inline-block;
+    border-radius: 100%;
+    width: 3px;
+    height: 3px;
+    background-color: #fff;
+    margin: 0 16px;
+    opacity: 0.5;
+    vertical-align: middle;
+}
+
+.details * {
+    color: var(--color-text);
+    font-weight: 300;
+}
+
+.modal {
+    position: absolute;
+    left: -1px;
+    top: 0;
+    width: 200px;
+    height: 200px;
+    transition: 0.3s all;
+    background: black;
+    display: none;
+    animation: zoomIn 0.3s both;
+    transform-origin: left center;
+}
+
+@keyframes zoomIn {
+    0% {
+        opacity: 0;
+        transform: scale3d(0.3, 0.3, 0.3);
+    }
+    50% {
+        opacity: 1;
+    }
+}
+.zoom {
+    display: block;
+    width: 150%;
+    height: 150%;
+}

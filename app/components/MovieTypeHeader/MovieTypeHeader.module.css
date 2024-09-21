@@ -1,0 +1,37 @@
+.wrapper {
+    color: #fff;
+    font-size: 1rem;
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: space-between;
+}
+.title {
+    font-size: 1.5rem;
+}
+
+.descr {
+    font-weight: 300;
+}
+
+.descr {
+    margin-top: 10px;
+}
+
+.arrow {
+    position: relative;
+    bottom: 1px;
+    font-family: monospace;
+    font-size: 1.5rem;
+}
+
+.rightText {
+    font-size: 18px;
+    font-weight: bold;
+}
+.right {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    cursor: pointer;
+    line-height: 20px;
+}
