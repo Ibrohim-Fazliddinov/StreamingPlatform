@@ -144,7 +144,7 @@
 Склонируйте этот репозиторий на ваш локальный компьютер, переименуйте файл `.env.example`, который находится в корневой директории проекта, в `.env` и обновите переменные окружения соответствующим образом.
 
 ```python
-$ docker-compose up
+$ docker-compose up -d --build
 $ docker-compose exec web python manage.py createsuperuser
 
 ```
