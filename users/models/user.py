@@ -1,20 +1,19 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from phonenumber_field.modelfields import PhoneNumberField
-from accounts.managers.user_manager import UserManager
 from django.utils import timezone
 from django.contrib.auth.models import (
     AbstractBaseUser,
-    PermissionsMixin,
-    Group, Permission
 )
 
+from users.managers.managers import CustomUserManager
 
-class User(AbstractBaseUser, PermissionsMixin):
+
+class CustomUser(AbstractBaseUser):
     """
     Кастомная модель пользователя, которая расширяет базовые классы AbstractBaseUser и PermissionsMixin Django.
 
-    Данная модель представляет пользователя в системе и содержит несколько ключевых полей для хранения 
+    Данная модель представляет пользователя в системе и содержит несколько ключевых полей для хранения
     информации о пользователе, таких как юзернейм, email и номер телефона. Также включает поля для
     отслеживания времени последнего входа, даты создания и даты изменения учетной записи.
 
@@ -23,7 +22,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         first_name (CharField): Имя пользователя. Необязательное поле.
         second_name (CharField): Фамилия пользователя. Необязательное поле.
         email (EmailField): Уникальный email пользователя.
-        telephone (PhoneNumberField): Уникальный номер телефона пользователя. Необязательное поле.
+        phone_number (PhoneNumberField): Уникальный номер телефона пользователя. Необязательное поле.
         created_at (DateTimeField): Дата создания учетной записи. Устанавливается по умолчанию на текущее время.
         last_login (DateTimeField): Дата и время последнего входа пользователя. Устанавливается автоматически при входе.
 
@@ -33,7 +32,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     class Role(models.TextChoices):
         CUSTOMER = 'CUS', _('Клиент')
-        ADMIN = 'ADM', _('Админимстратор')
+        ADMIN = 'ADM', _('Администратор')
         MODERATOR = 'MOD', _('Модератор')
         CONTENT_MAKER = 'CNM', _('КонетнтМейкер')
         DEVELOPER = 'DEV', _('Разработчик')
@@ -59,7 +58,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         unique=True,
         verbose_name="Ваш email"
     )
-    telephone = PhoneNumberField(
+    phone_number = PhoneNumberField(
         unique=True,
         verbose_name="Номер телефона",
         null=True,
@@ -71,7 +70,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     )
 
     last_login = models.DateTimeField(
-        auto_now_add=True,
+        auto_now=True,
         verbose_name="Дата последнего входа",
         null=True
     )
@@ -91,24 +90,13 @@ class User(AbstractBaseUser, PermissionsMixin):
         verbose_name="Активен"
     )
 
-    groups = models.ManyToManyField(
-        Group,
-        related_name='custom_user_set',  # Уникальное имя для групп
-        blank=True
-    )
-    user_permissions = models.ManyToManyField(
-        Permission,
-        related_name='custom_user_permissions_set',  # Уникальное имя для разрешений
-        blank=True
-    )
+    objects = CustomUserManager()
 
-    objects = UserManager()
-
-    USERNAME_FIELD = 'username'
-    REQUIRED_FIELDS = ['email']
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username']
 
     class Meta:
-        app_label = 'accounts'
+        app_label = 'users'
         verbose_name = "Пользователь"
         verbose_name_plural = "Пользователи"
 
@@ -117,8 +105,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         return f"{self.first_name}|{self.last_name}"
 
     def __str__(self):
-        # return f'{self.get_full_name} | {self.pk}'
 
-        telephone = self.telephone if self.telephone else "No phone"
+        telephone = self.phone_number
         role = self.get_user_role_display()  # Получаем текстовое представление роли
         return f'{self.get_full_name} | {self.pk} | {role} | {telephone}'

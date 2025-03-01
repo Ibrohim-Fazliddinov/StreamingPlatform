@@ -1,5 +1,5 @@
 import pytest
-from accounts.models import User
+from users.models import User
 from django.utils import timezone
 from django.contrib.auth import authenticate
 from django.core.exceptions import ValidationError
