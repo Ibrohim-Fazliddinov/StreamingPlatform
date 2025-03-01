@@ -4,12 +4,29 @@ from phonenumber_field.modelfields import PhoneNumberField
 from django.utils import timezone
 from django.contrib.auth.models import (
     AbstractBaseUser,
+    PermissionsMixin,
 )
+
+COUNTRY_CHOICES = [
+    ('CSM', 'Международный'),
+    ('AZ', 'Азербайджан'),
+    ('AM', 'Армения'),
+    ('BY', 'Беларусь'),
+    ('KZ', 'Казахстан'),
+    ('KG', 'Кыргызстан'),
+    ('MD', 'Молдова'),
+    ('RU', 'Россия'),
+    ('TJ', 'Таджикистан'),
+    ('TM', 'Туркменистан'),
+    ('UZ', 'Узбекистан'),
+
+]
+
 
 from users.managers.managers import CustomUserManager
 
 
-class CustomUser(AbstractBaseUser):
+class CustomUser(AbstractBaseUser, PermissionsMixin):
     """
     Кастомная модель пользователя, которая расширяет базовые классы AbstractBaseUser и PermissionsMixin Django.
 
@@ -88,6 +105,13 @@ class CustomUser(AbstractBaseUser):
     is_active = models.BooleanField(
         default=True,
         verbose_name="Активен"
+    )
+
+    country = models.CharField(
+        max_length=5,
+        choices=COUNTRY_CHOICES,
+        default='CSM',
+        verbose_name=_("Страна"),
     )
 
     objects = CustomUserManager()
