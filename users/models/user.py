@@ -1,4 +1,5 @@
 from django.db import models
+from users.managers.managers import CustomUserManager
 from django.utils.translation import gettext_lazy as _
 from phonenumber_field.modelfields import PhoneNumberField
 from django.utils import timezone
@@ -21,10 +22,6 @@ COUNTRY_CHOICES = [
     ('UZ', 'Узбекистан'),
 
 ]
-
-
-from users.managers.managers import CustomUserManager
-
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     """

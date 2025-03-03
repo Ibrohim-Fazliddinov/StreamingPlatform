@@ -56,3 +56,5 @@ uritemplate==4.1.1
 urllib3==2.2.3
 
 geoip2~=5.0.1
+django-crum~=0.7.9
+django-filter~=25.1

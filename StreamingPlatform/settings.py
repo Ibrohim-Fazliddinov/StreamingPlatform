@@ -3,6 +3,7 @@ import os
 from datetime import timedelta
 import environ
 import psycopg2
+from celery.schedules import crontab
 
 # region ---------------------- BASE CONFIGURATION -----------------------------------------
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -271,3 +272,54 @@ AUTH_USER_MODEL = 'users.CustomUser'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # AUTHENTICATION_BACKENDS = ('users.backends.AuthBackend',)
 GEOIP_PATH = os.path.join(BASE_DIR, 'geoip')
+
+
+
+
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+]
+
+
+# region ---------------------- CELERY ------------------------------------------------
+
+# Использование брокера сообщений для Celery (Redis)
+CELERY_BROKER_URL = os.getenv("REDDIS_URL", "redis://localhost:6379/0")
+
+# Использование Redis для хранения результатов выполнения задач
+CELERY_RESULT_BACKEND = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+
+# Отслеживание состояния выполнения задач (по умолчанию выключено)
+CELERY_TASK_TRACK_STARTED = os.getenv("CELERY_TASK_TRACK_STARTED", "False").lower() in ("true", "1", "yes")
+
+# Максимальное время выполнения задачи (30 минут)
+CELERY_TASK_TIME_LIMIT = 30 * 60
+
+# Поддерживаемые форматы сериализации данных
+CELERY_ACCEPT_CONTENT = [os.getenv("ACCEPT_CONTENT", "json")]
+CELERY_RESULT_SERIALIZER = os.getenv("RESULT_SERIALIZER", "json")
+CELERY_TASK_SERIALIZER = os.getenv("TASK_SERIALIZER", "json")
+
+# Указание временной зоны сервера для корректного выполнения задач по расписанию
+CELERY_TIMEZONE = os.getenv("TIMEZONE",)
+
+# Настройка периодических задач Celery Beat
+CELERY_BEAT_SCHEDULE = {
+    "backup_database": {
+        # Путь к задаче, указанной в model_tk.py
+        "task": "common.tasks.db_backup_task",
+        # Резервное копирование БД каждый день в полночь
+        "schedule": crontab(hour=0, minute=0),
+    },
+}

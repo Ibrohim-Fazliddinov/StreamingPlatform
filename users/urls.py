@@ -1,26 +1,36 @@
-from django.urls import path, include
-from users.serializers.views import users
-from django.contrib.auth import views as auth_views
+from django.urls import path
+from rest_framework.routers import DefaultRouter
+from common.utils import filter_routes
+from users.views.auth import CustomTokenObtainPairView, CustomTokenRefreshView, CustomTokenVerifyView
+from users.views.users import AuthView, PasswordChangingView
 
+
+# Настройка маршрутов
+router = DefaultRouter()
+router.register(r'auth', AuthView, basename='auth')
+router.register(r'password', PasswordChangingView, basename='password')
+
+# Разрешенные URL-шаблоны
+allowed_urls = (
+    'password/change_password/',
+    'password/reset_password/',
+    'password/reset_password_confirm/',
+
+    'auth/activate/',
+    'auth/registration/',
+    'auth/user_list/',
+    'auth/user_search/',
+    'auth/user_update/',
+
+)
+
+# Фильтруем маршруты пользователей
+filtered_user_routes = filter_routes(router.urls, allowed_urls)
+
+# Основные маршруты
 urlpatterns = [
-    # path('users/reg', users.RegistrationView.as_view(), name='reg'),
-    # path('users/profile', users.ProfileView.as_view(), name='profile'),
-    # path('users/change-password', users.ChangePasswordView.as_view(), name='change-password'),
-]
-urlpatterns += [
-    # Маршруты для работы с dj-rest-auth
-    path('auth/', include('dj_rest_auth.urls')),
-
-    # # Маршруты для шаблонов Django
-    path('reset_password_sent/',
-         auth_views.PasswordResetDoneView.as_view(),
-         name='password_reset_done'),
-
-    path('reset/<uidb64>/<token>/',
-         auth_views.PasswordResetConfirmView.as_view(),
-         name='password_reset_confirm'),
-
-    path('reset_password_complete/',
-         auth_views.PasswordResetCompleteView.as_view(),
-         name='password_reset_complete'),
+    path('auth/jwt/create', CustomTokenObtainPairView.as_view(), name='create-token'),
+    path('auth/jwt/refresh', CustomTokenRefreshView.as_view(), name='refresh-token'),
+    path('auth/jwt/verify', CustomTokenVerifyView.as_view(), name='verify-token'),
+    *filtered_user_routes,  # Распаковка отфильтрованных маршрутов
 ]

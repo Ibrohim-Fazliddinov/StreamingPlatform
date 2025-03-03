@@ -1,10 +1,12 @@
 from typing import Optional, Union
 from django.contrib.auth.models import BaseUserManager
-
 from users.utils import get_country_from_ip
 
 
 class CustomUserManager(BaseUserManager):
+    """
+    Кастомный менеджер пользователей, поддерживающий создание обычных пользователей и суперпользователей.
+    """
     use_in_migrations = True
 
     def _create(
@@ -16,6 +18,17 @@ class CustomUserManager(BaseUserManager):
         request=None,
         **extra_fields: Union[str, bool]
     ):
+        """
+        Вспомогательный метод для создания пользователя.
+
+        :param phone_number: Номер телефона пользователя (опционально).
+        :param email: Email пользователя (опционально).
+        :param username: Имя пользователя (опционально).
+        :param password: Пароль пользователя.
+        :param request: Запрос Django, используется для определения страны по IP (опционально).
+        :param extra_fields: Дополнительные параметры пользователя.
+        :return: Созданный пользователь.
+        """
         if not (username or email or phone_number):
             raise ValueError("Must provide at least username, email, or phone_number")
 
@@ -55,6 +68,17 @@ class CustomUserManager(BaseUserManager):
         request=None,
         **extra_fields: Union[str, bool]
     ):
+        """
+        Создает обычного пользователя.
+
+        :param phone_number: Номер телефона пользователя (опционально).
+        :param email: Email пользователя (опционально).
+        :param username: Имя пользователя (опционально).
+        :param password: Пароль пользователя.
+        :param request: Запрос Django, используется для определения страны по IP (опционально).
+        :param extra_fields: Дополнительные параметры пользователя.
+        :return: Созданный пользователь.
+        """
         extra_fields.setdefault("is_superuser", False)
         extra_fields.setdefault("is_active", True)
         extra_fields.setdefault("is_staff", False)
@@ -70,10 +94,22 @@ class CustomUserManager(BaseUserManager):
         request=None,
         **extra_fields: Union[str, bool]
     ):
+        """
+        Создает суперпользователя.
+
+        :param phone_number: Номер телефона пользователя (опционально).
+        :param email: Email пользователя (опционально).
+        :param username: Имя пользователя (опционально).
+        :param password: Пароль пользователя.
+        :param request: Запрос Django, используется для определения страны по IP (опционально).
+        :param extra_fields: Дополнительные параметры пользователя.
+        :return: Созданный суперпользователь.
+        """
         extra_fields.setdefault("is_superuser", True)
         extra_fields.setdefault("is_active", True)
         extra_fields.setdefault("is_staff", True)
 
         return self._create(phone_number, email, username, password, request, **extra_fields)
+
 
 
