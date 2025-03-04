@@ -1,14 +1,18 @@
 from typing import Optional, Union
 from crum import get_current_user
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AnonymousUser
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.conf import settings
 from djoser.serializers import ActivationSerializer
 from drf_spectacular.utils import extend_schema_view, extend_schema
 from rest_framework import status
 from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
+
+from common.permissions import IsClient, IsContentMaker
 from common.view import ExtendedUserViewSet
 from rest_framework.filters import SearchFilter, OrderingFilter
 from users.serializers.api.serializer_user import (
@@ -74,6 +78,11 @@ class AuthView(ExtendedUserViewSet):
     """
 
     serializer_class = UserListSerializer()
+    multi_permission_classes = {
+        'registration': (AllowAny,),
+        'activate': (AllowAny,),
+        'user_update': (IsClient,),
+    }
     multi_serializer_class = {
         'registration': RegistrationsSerializer,
         'activate': ActivationSerializer,
@@ -214,7 +223,7 @@ class PasswordChangingView(ExtendedUserViewSet):
     Данный viewset предоставляет функциональность смены пароля,
     запроса на сброс пароля и подтверждения сброса пароля.
     """
-
+    permission_classes = [IsAuthenticated]
     serializer_class = ChangePasswordSerializer()
     multi_serializer_class = {
         'change_password': ChangePasswordSerializer,

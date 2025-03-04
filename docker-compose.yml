@@ -1,4 +1,5 @@
 version: "3.3"
+
 services:
   web:
     build:
@@ -13,21 +14,23 @@ services:
     ports:
       - "8000:8000"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
     networks:
       - backend
+    restart: always
 
   db:
     image: postgres:16-alpine
     container_name: db-postgres-platform
-    environment:
-      POSTGRES_USER: ${DB_USERNAME}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
+    env_file:
+      - ./.env
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5433:5433"
+      - "5432:5432"
     networks:
       - backend
     healthcheck:
@@ -35,27 +38,36 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    restart: always
 
-# redis:
-# image: redis:7
-# ports:
-# - "6379:6379"
-# networks:
-# - backend
+  redis:
+    image: redis:7
+    container_name: redis-cache
+    ports:
+      - "6379:6379"
+    networks:
+      - backend
+    restart: always
 
-# celery:
-# build: .
-# command: celery -A config worker -l info
-# volumes:
-# - .:/code
-# env_file:
-# - ./.env
-# depends_on:
-# - db
-# - redis
-# - web
-# networks:
-# - backend
+  celery:
+    build: .
+    command: celery -A config worker --loglevel=info
+    container_name: celery-worker
+    volumes:
+      - .:/code
+    env_file:
+      - ./.env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      web:
+        condition: service_started
+    networks:
+      - backend
+    restart: always
+
 volumes:
   postgres_data:
 

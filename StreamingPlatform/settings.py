@@ -42,16 +42,7 @@ INSTALLED_APPS = [
     # region ----------------- APPLICATIONS --------------------
     'api',  # приложения где будут все апи
     'common',  # приложения, где будут функции которые чаще используются для DRY
-    # AUTH
     'users',
-    # CONTENT
-    'content',
-    'comments',
-    'statistic',
-    'playlist',
-    # PAYMENT
-    'subscription',
-    'payment',
     # endregion --------------------------------------------------
 
     'drf_spectacular',  # всегда указывать после всех других созданных приложений проекта или же в конце
@@ -222,24 +213,33 @@ DJOSER = {
 }
 # endregion -------------------------------------------------------------------------=========
 
-# region ---------------------- SPECTACULLAR  SETTINGS  --------------------------------------
+# region ---------------------- SPECTACULAR SETTINGS --------------------------------------
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'STREAMING PLATFORM',
-    'DESCRIPTION': 'Проект, который должен заменить YouTube и стать лучше него в СНГ',
+    'TITLE': '',
+    'DESCRIPTION': '',
     'VERSION': '1.0.0',
     'SERVE_PERMISSIONS': [
         'rest_framework.permissions.IsAuthenticated',
     ],
     'SERVE_AUTHENTICATION': [
-        # 'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ],
     'SWAGGER_UI_SETTINGS': {
-        'DeepLinking': True,
-        'DisplayOperationId': True,
+        'deepLinking': True,
+        "displayOperationId": True,
+        "syntaxHighlight.active": True,
+        "syntaxHighlight.theme": "arta",
+        "defaultModelsExpandDepth": -1,
+        "displayRequestDuration": True,
+        "filter": True,
+        "requestSnippetsEnabled": True,
     },
+
     'COMPONENT_SPLIT_REQUEST': True,
     'SORT_OPERATIONS': False,
+
+    'ENABLE_DJANGO_DEPLOY_CHECK': False,
+    'DISABLE_ERRORS_AND_WARNINGS': True,
 }
 # endregion -------------------------------------------------------------------
 
@@ -250,15 +250,7 @@ USE_I18N = True
 USE_TZ = True
 # endregion ----------------------------------------------------------------------------------
 
-# region ---------------------- MEDIA AND STATIC ----------------------------------------------
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, '../', 'mediafiles')
-STATIC_URL = 'static/'
-STATIC_ROOT = os.path.join(BASE_DIR, '../', 'staticfiles')
-# endregion ------------------------------------------------------------------------------------
-
 # region ---------------------- SMTP -----------------------------------------------------------
-
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 # Настройка почтового сервера по SMTP-протоколу
 EMAIL_HOST = os.getenv('EMAIL_HOST')
@@ -272,10 +264,6 @@ AUTH_USER_MODEL = 'users.CustomUser'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # AUTHENTICATION_BACKENDS = ('users.backends.AuthBackend',)
 GEOIP_PATH = os.path.join(BASE_DIR, 'geoip')
-
-
-
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -323,3 +311,15 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": crontab(hour=0, minute=0),
     },
 }
+
+# endregion ---------------------------------------------------------------------------------
+
+# region ------------------------- STATIC AND MEDIA ----------------------------------------
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+MEDIA_TEST_ROOT = os.path.join(BASE_DIR, 'media/test/')
+# endregion ---------------------------------------------------------------------------------
+
