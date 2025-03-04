@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 import os
 from datetime import timedelta
@@ -101,35 +102,37 @@ WSGI_APPLICATION = 'StreamingPlatform.wsgi.application'
 # endregion ------------------------------------------------------------------------
 
 # region ---------------------- DATABASE ----------------------------------------------------
-# Функция проверки доступности PostgreSQL
+logger = logging.getLogger(__name__)
+
 def is_postgres_available():
+    """Проверяет доступность PostgreSQL"""
     try:
-        conn = psycopg2.connect(
-            dbname=env.str('PG_DATABASE', 'postgre'),
-            user=env.str('PG_USER', 'postgre'),
-            password=env.str('PG_PASSWORD', 'postgre'),
+        with psycopg2.connect(
+            dbname=env.str('DB_NAME', 'postgre'),
+            user=env.str('DB_USERNAME', 'postgre'),
+            password=env.str('DB_PASSWORD', 'postgre'),
             host=env.str('DB_HOST', 'localhost'),
             port=env.int('DB_PORT', 5432),
-        )
-        conn.close()
-        return True
-    except psycopg2.OperationalError:
+        ) as conn:
+            return True
+    except psycopg2.OperationalError as e:
+        logger.warning(f"PostgreSQL недоступен: {e}")
         return False
 
-
-# Настройка баз данных с проверкой доступности PostgreSQL
+# Выбор БД
 if is_postgres_available():
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.getenv('DB_NAME', default='postgre'),
-            'USER': os.getenv('DB_USERNAME', default='postgre'),
-            'PASSWORD': os.getenv('DB_PASSWORD', default='postgre'),
-            'HOST': os.getenv('DB_HOST', default='localhost'),
-            'PORT': os.getenv('DB_PORT', default=5432),
+            'NAME': env.str('DB_NAME', 'postgre'),
+            'USER': env.str('DB_USERNAME', 'postgre'),
+            'PASSWORD': env.str('DB_PASSWORD', 'postgre'),
+            'HOST': env.str('DB_HOST', 'localhost'),
+            'PORT': env.int('DB_PORT', 5432),
         },
     }
 else:
+    logger.warning("Переключение на SQLite, так как PostgreSQL недоступен.")
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',

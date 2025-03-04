@@ -23,14 +23,18 @@ services:
     restart: always
 
   db:
-    image: postgres:16-alpine
+    image: postgres:17-alpine
     container_name: db-postgres-platform
     env_file:
       - ./.env
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 4599
+      POSTGRES_DB: streaming_platform
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "5434:5433"
     networks:
       - backend
     healthcheck:
@@ -51,7 +55,7 @@ services:
 
   celery:
     build: .
-    command: celery -A config worker --loglevel=info
+    command: celery -A StreamingPlatform worker --loglevel=info
     container_name: celery-worker
     volumes:
       - .:/code
