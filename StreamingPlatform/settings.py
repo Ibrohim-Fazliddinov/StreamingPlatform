@@ -1,10 +1,10 @@
+import logging
 from pathlib import Path
 import os
 from datetime import timedelta
 import environ
 import psycopg2
-import logging.config
-
+from celery.schedules import crontab
 
 # region ---------------------- BASE CONFIGURATION -----------------------------------------
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,6 +23,7 @@ CORS_ALLOW_HEADERS = ['*']
 CSRF_COOKIE_SECURE = False
 # endregion ---------------------------------------------------------------------------------
 
+
 INSTALLED_APPS = [
     # region ----------------- BASE DJANGO PACKAGES -----------
     'django.contrib.admin',
@@ -33,7 +34,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # endregion ------------------------------------------------
 
-    # region ----------------- REST FRAMEWORK MODULES ---------
+    # region ----------------- REST FRAMEWORK MODULES -----------
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_simplejwt',
@@ -42,26 +43,15 @@ INSTALLED_APPS = [
     # region ----------------- APPLICATIONS --------------------
     'api',  # приложения где будут все апи
     'common',  # приложения, где будут функции которые чаще используются для DRY
-    # AUTH
-    'accounts',
-    # CONTENT
-    'content',
-    'comments',
-    'statistic',
-    'playlist',
-    # PAYMENT
-    'subscription',
-    'payment',
+    'users',
     # endregion --------------------------------------------------
 
     'drf_spectacular',  # всегда указывать после всех других созданных приложений проекта или же в конце
-    'django_elasticsearch_dsl',
 ]
 
 # region -------------------- MD & TEMP & WSGI & VALIDATORS & URLCONF -----------------------
 
 MIDDLEWARE = [
-    'StreamingPlatform.middleware.LoggingMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -78,7 +68,8 @@ ROOT_URLCONF = 'StreamingPlatform.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
+        'DIRS': [BASE_DIR / 'templates']
+        ,
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -111,44 +102,44 @@ WSGI_APPLICATION = 'StreamingPlatform.wsgi.application'
 # endregion ------------------------------------------------------------------------
 
 # region ---------------------- DATABASE ----------------------------------------------------
-# Функция проверки доступности PostgreSQL
-
+logger = logging.getLogger(__name__)
 
 def is_postgres_available():
+    """Проверяет доступность PostgreSQL"""
     try:
-        conn = psycopg2.connect(
-            dbname=env.str('DB_NAME', 'platform_base'),
-            user=env.str('DB_USERNAME', 'postgres'),
-            password=env.str('DB_PASSWORD', '27Fa00'),
-            host=env.str('DB_HOST', 'db'),  # Используйте имя контейнера db
+        with psycopg2.connect(
+            dbname=env.str('DB_NAME', 'postgre'),
+            user=env.str('DB_USERNAME', 'postgre'),
+            password=env.str('DB_PASSWORD', 'postgre'),
+            host=env.str('DB_HOST', 'localhost'),
             port=env.int('DB_PORT', 5432),
-        )
-        conn.close()
-        return True
+        ) as conn:
+            return True
     except psycopg2.OperationalError as e:
-        print(f"Ошибка подключения к базе данных: {e}")
+        logger.warning(f"PostgreSQL недоступен: {e}")
         return False
 
-
-# Настройка баз данных с проверкой доступности PostgreSQL
+# Выбор БД
 if is_postgres_available():
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': env.str('DB_NAME', 'postgres'),
-            'USER': env.str('DB_USERNAME', 'postgres'),
-            'PASSWORD': env.str('DB_PASSWORD', 'postgres'),
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': env.str('DB_NAME', 'postgre'),
+            'USER': env.str('DB_USERNAME', 'postgre'),
+            'PASSWORD': env.str('DB_PASSWORD', 'postgre'),
             'HOST': env.str('DB_HOST', 'localhost'),
             'PORT': env.int('DB_PORT', 5432),
-        }
+        },
     }
 else:
+    logger.warning("Переключение на SQLite, так как PostgreSQL недоступен.")
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+            'NAME': BASE_DIR / 'db.sqlite3'
         }
     }
+
 # endregion ---------------------------------------------------------------------------------
 
 # region ---------------------- REST FRAMEWORK ----------------------------------------------
@@ -161,6 +152,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
+
     ),
 
     'DEFAULT_PARSER_CLASSES': (
@@ -174,7 +166,7 @@ REST_FRAMEWORK = {
 }
 # endregion -------------------------------------------------------------------------
 
-# region ---------------------- SIPMLE JWT & DJOSER -----------------------------------------
+# region ---------------------- SIMPLE JWT & DJOSER -----------------------------------------
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
@@ -222,26 +214,35 @@ DJOSER = {
     'SEND_ACTIVATION_EMAIL': False,
     'SERIALIZERS': {},
 }
-# endregion -------------------------------------------------------------------------
+# endregion -------------------------------------------------------------------------=========
 
 # region ---------------------- SPECTACULAR SETTINGS --------------------------------------
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'STREAMING PLATFORM',
-    'DESCRIPTION': 'Проект, который должен заменить YouTube и стать лучше него в СНГ',
+    'TITLE': '',
+    'DESCRIPTION': '',
     'VERSION': '1.0.0',
     'SERVE_PERMISSIONS': [
         'rest_framework.permissions.IsAuthenticated',
     ],
     'SERVE_AUTHENTICATION': [
-        # 'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ],
     'SWAGGER_UI_SETTINGS': {
-        'DeepLinking': True,
-        'DisplayOperationId': True,
+        'deepLinking': True,
+        "displayOperationId": True,
+        "syntaxHighlight.active": True,
+        "syntaxHighlight.theme": "arta",
+        "defaultModelsExpandDepth": -1,
+        "displayRequestDuration": True,
+        "filter": True,
+        "requestSnippetsEnabled": True,
     },
+
     'COMPONENT_SPLIT_REQUEST': True,
     'SORT_OPERATIONS': False,
+
+    'ENABLE_DJANGO_DEPLOY_CHECK': False,
+    'DISABLE_ERRORS_AND_WARNINGS': True,
 }
 # endregion -------------------------------------------------------------------
 
@@ -252,60 +253,76 @@ USE_I18N = True
 USE_TZ = True
 # endregion ----------------------------------------------------------------------------------
 
-# region ---------------------- MEDIA AND STATIC ----------------------------------------------
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, '../', 'mediafiles')
-STATIC_URL = 'static/'
-STATIC_ROOT = os.path.join(BASE_DIR, '../', 'staticfiles')
+# region ---------------------- SMTP -----------------------------------------------------------
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+# Настройка почтового сервера по SMTP-протоколу
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+EMAIL_PORT = os.getenv('EMAIL_PORT')
+EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS')
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 # endregion ------------------------------------------------------------------------------------
 
-AUTH_USER_MODEL = 'accounts.User'
+AUTH_USER_MODEL = 'users.CustomUser'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-AUTHENTICATION_BACKENDS = ('accounts.backends.AuthBackend',)
+# AUTHENTICATION_BACKENDS = ('users.backends.AuthBackend',)
+GEOIP_PATH = os.path.join(BASE_DIR, 'geoip')
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+]
 
-# region ---------------------- LOGGING CONFIG SETTINGS ----------------------------------------------
-LOGGING_CONFIG = None
-logging.config.dictConfig({
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': '{levelname} {asctime} {module} {message}',
-            'style': '{',
-        },
-    },
-    'handlers': {
-        'file': {
-            'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': 'duration_request_view.log',
-            'formatter': 'verbose',
-        },
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
-        },
-    },
-    'loggers': {
-        'duration_request_view': {
-            'handlers': ['file'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        'django': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-            'propagate': False,
-        },
-    },
-})
-# endregion ------------------------------------------------------------------------------------
 
-# region ---------------------- ELASTICSEARCH SETTINGS ----------------------------------------------
-ELASTICSEARCH_DSL = {
-    'default': {
-        'hosts': ['http://elasticsearch:9200'],  # Правильный ключ для указания хоста
-    }
+# region ---------------------- CELERY ------------------------------------------------
+
+# Использование брокера сообщений для Celery (Redis)
+CELERY_BROKER_URL = os.getenv("REDDIS_URL", "redis://localhost:6379/0")
+
+# Использование Redis для хранения результатов выполнения задач
+CELERY_RESULT_BACKEND = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+
+# Отслеживание состояния выполнения задач (по умолчанию выключено)
+CELERY_TASK_TRACK_STARTED = os.getenv("CELERY_TASK_TRACK_STARTED", "False").lower() in ("true", "1", "yes")
+
+# Максимальное время выполнения задачи (30 минут)
+CELERY_TASK_TIME_LIMIT = 30 * 60
+
+# Поддерживаемые форматы сериализации данных
+CELERY_ACCEPT_CONTENT = [os.getenv("ACCEPT_CONTENT", "json")]
+CELERY_RESULT_SERIALIZER = os.getenv("RESULT_SERIALIZER", "json")
+CELERY_TASK_SERIALIZER = os.getenv("TASK_SERIALIZER", "json")
+
+# Указание временной зоны сервера для корректного выполнения задач по расписанию
+CELERY_TIMEZONE = os.getenv("TIMEZONE",)
+
+# Настройка периодических задач Celery Beat
+CELERY_BEAT_SCHEDULE = {
+    "backup_database": {
+        # Путь к задаче, указанной в model_tk.py
+        "task": "common.tasks.db_backup_task",
+        # Резервное копирование БД каждый день в полночь
+        "schedule": crontab(hour=0, minute=0),
+    },
 }
-# endregion ------------------------------------------------------------------------------------
+
+# endregion ---------------------------------------------------------------------------------
+
+# region ------------------------- STATIC AND MEDIA ----------------------------------------
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+MEDIA_TEST_ROOT = os.path.join(BASE_DIR, 'media/test/')
+# endregion ---------------------------------------------------------------------------------
+

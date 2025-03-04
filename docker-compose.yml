@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+=======
+version: "3.3"
+
+>>>>>>> auth
 services:
   web:
     build:
@@ -12,6 +17,7 @@ services:
     ports:
       - "8000:8000"
     depends_on:
+<<<<<<< HEAD
       - db
       - elasticsearch
     networks:
@@ -20,18 +26,29 @@ services:
       test: ["CMD", "curl", "-f", "http://elasticsearch:9200"]
       interval: 10s
       retries: 5
+=======
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      - backend
+    restart: always
+>>>>>>> auth
 
   db:
-    image: postgres:16-alpine
+    image: postgres:17-alpine
     container_name: db-postgres-platform
+    env_file:
+      - ./.env
     environment:
-      POSTGRES_USER: ${DB_USERNAME}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 4599
+      POSTGRES_DB: streaming_platform
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "5434:5433"
     networks:
       - backend
     healthcheck:
@@ -39,7 +56,18 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    restart: always
 
+  redis:
+    image: redis:7
+    container_name: redis-cache
+    ports:
+      - "6379:6379"
+    networks:
+      - backend
+    restart: always
+
+<<<<<<< HEAD
   elasticsearch:
     image: bitnami/elasticsearch:8.7.0
     container_name: elasticsearch-platform
@@ -56,6 +84,26 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:9200"]
       interval: 10s
       retries: 5
+=======
+  celery:
+    build: .
+    command: celery -A StreamingPlatform worker --loglevel=info
+    container_name: celery-worker
+    volumes:
+      - .:/code
+    env_file:
+      - ./.env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      web:
+        condition: service_started
+    networks:
+      - backend
+    restart: always
+>>>>>>> auth
 
 volumes:
   postgres_data:
