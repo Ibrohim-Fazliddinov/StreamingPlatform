@@ -42,19 +42,12 @@ class Profile(models.Model):
         default=None,
         blank=True
     )
-<<<<<<< HEAD:accounts/models/profile.py
-    country = models.CharField(
-        max_length=5,
-        choices=COUNTRY_CHOICES,
-        verbose_name=_("Страна"),
-    )
-    subscription_active = models.BooleanField(
-        verbose_name='Статус подписки на закрытый котент',  # можно сделать предложение о платной подписке в момент
-        # регестрации , если клиент отказался будет ставиться в False
-        default=False
-    )
-=======
->>>>>>> auth:users/models/profile.py
+
+    # subscription_active = models.BooleanField(
+    #     verbose_name='Статус подписки на закрытый контент',  # можно сделать предложение о платной подписке в момент
+    #     # регестрации , если клиент отказался будет ставиться в False
+    #     default=False
+    # )
 
  
     class Meta:

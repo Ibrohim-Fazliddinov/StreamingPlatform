@@ -1,3 +1,4 @@
+
 from django.db import models
 from users.managers.managers import CustomUserManager
 from django.utils.translation import gettext_lazy as _
@@ -7,6 +8,8 @@ from django.contrib.auth.models import (
     AbstractBaseUser,
     PermissionsMixin,
 )
+
+
 
 COUNTRY_CHOICES = [
     ('CSM', 'Международный'),
@@ -130,3 +133,15 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         telephone = self.phone_number
         role = self.get_user_role_display()  # Получаем текстовое представление роли
         return f'{self.get_full_name} | {self.pk} | {role} | {telephone}'
+
+    # def get_watch_later_playlist(self):
+    #     return self.playlist_owner.filter(type=Playlist.PlaylistTypeChoices.WATCH_LATER).first()
+    #
+    # def get_liked_playlist(self):
+    #     return self.playlist_owner.filter(type=Playlist.PlaylistTypeChoices.LIKED).first()
+    #
+    # def get_history_playlist(self):
+    #     return self.playlist_owner.filter(type=Playlist.PlaylistTypeChoices.WATCH_HISTORY).first()
+
+
+

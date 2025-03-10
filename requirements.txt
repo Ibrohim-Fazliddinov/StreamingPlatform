@@ -17,7 +17,7 @@ click-repl==0.3.0
 cryptography==44.0.1
 defusedxml==0.8.0rc2
 dj-rest-auth==6.0.0
-Django==5.1
+Django==5.1.7
 django-allauth==65.0.2
 django-cors-headers==4.4.0
 django-crum==0.7.9
@@ -73,17 +73,14 @@ social-auth-app-django==5.4.2
 social-auth-core==4.5.4
 sqlparse==0.5.1
 typing_extensions==4.12.2
-<<<<<<< HEAD
-django-filter==24.3
 uritemplate==4.1.1
 urllib3==2.2.3
 elasticsearch==8.15.1
 django-elasticsearch-dsl==8.0
-=======
 tzdata==2025.1
 uritemplate==4.1.1
 urllib3==2.2.3
 vine==5.1.0
 wcwidth==0.2.13
 yarl==1.18.3
->>>>>>> auth
+elasticsearch-dsl~=8.17.1

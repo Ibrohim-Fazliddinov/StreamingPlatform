@@ -26,3 +26,5 @@ from django.db import models
 #     class Meta:
 #         verbose_name = "Коментарий"
 #         verbose_name_plural = "Коментарии"
+class Comment:
+    pass

@@ -16,7 +16,7 @@ class Payment(models.Model):
         updated_at (DateTimeField): Время последнего обновления записи о платеже.
     """
 
-    class PAYMENT_METHOD(models.TextChoices):
+    class PaymentMethod(models.TextChoices):
         """
         Класс для описания возможных методов оплаты.
 
@@ -50,7 +50,7 @@ class Payment(models.Model):
     payment_options = models.CharField(
         _("Способ оплаты"),
         max_length=50,
-        choices=PAYMENT_METHOD.choices
+        choices=PaymentMethod.choices
     )
     # subscription = models.OneToOneField(
     #     "app.Subscription",

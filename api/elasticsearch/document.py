@@ -5,7 +5,7 @@ from elasticsearch_dsl import analyzer
 
 from StreamingPlatform import settings
 from content.models.model_category import Category
-from content.models.model_content import Content
+from content.models.model_content import VideoContent
 
 logger = logging.getLogger('duration_request_view')
 
@@ -44,7 +44,7 @@ class ContentDocument(Document):
         name = 'content'
 
     class Django:
-        model = Content  # Модель, связанная с этим документом
+        model = VideoContent  # Модель, связанная с этим документом
 
     @staticmethod
     def get_instances_from_related(related_instance):
@@ -54,7 +54,7 @@ class ContentDocument(Document):
         """
         if isinstance(related_instance, Category):
             # Используем обратную связь через Content, чтобы получить все контенты, связанные с категорией.
-            return Content.objects.filter(categories_content=related_instance)
+            return VideoContent.objects.filter(categories_content=related_instance)
         return []
 
     def prepare_preview_image(self, instance):
