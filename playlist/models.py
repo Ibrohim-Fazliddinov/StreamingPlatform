@@ -1,16 +1,6 @@
 from ckeditor.fields import RichTextField
-from django.contrib.auth import get_user_model
-from django.db import models
-from django.utils import timezone
 from common.choices import PublishStateChoices
 from common.mixin import InfoMixin
-from content.models.model_category import Category
-from django.utils.translation import gettext_lazy as _
-from content.models.model_content import VideoContent
-from users.models.profile import Profile
-
-User = get_user_model()
-
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
