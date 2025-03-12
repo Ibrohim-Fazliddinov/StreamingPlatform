@@ -91,7 +91,12 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         verbose_name="Дата последнего входа",
         null=True
     )
-
+    user_photo = models.ImageField(
+        upload_to='profile_photos/',
+        verbose_name=_("Фото пользователя"),
+        default=None,
+        blank=True
+    )
     user_role = models.CharField(
         max_length=3,
         choices=Role.choices,

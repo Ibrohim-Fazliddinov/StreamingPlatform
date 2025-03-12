@@ -6,8 +6,8 @@ from djoser import serializers as dj_serializers
 from rest_framework import serializers
 from rest_framework.exceptions import ParseError, ValidationError
 from django.db import transaction
-from users.models.profile import Profile
-from users.serializers.nested.serializer_profile import ProfileUpdateSerializer, ProfileShortSerializer
+from channel.models import Channel
+from users.serializers.nested.serializer_channel import ChannelShortSerializer, ChannelUpdateSerializer
 
 User = get_user_model()
 
@@ -143,7 +143,7 @@ class UserListSerializer(serializers.ModelSerializer):
     """
     Сериализатор для отображения списка пользователей.
     """
-    profile = ProfileShortSerializer()
+    channel = ChannelShortSerializer()
 
     class Meta:
         model = User
@@ -153,7 +153,7 @@ class UserListSerializer(serializers.ModelSerializer):
             'email',
             'phone_number',
             'country',
-            'profile',
+            'channel',
         )
 
 
@@ -162,7 +162,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
     Сериализатор для обновления данных пользователя.
 
     """
-    profile = ProfileUpdateSerializer()
+    channel = ChannelUpdateSerializer()
 
     class Meta:
         model = User
@@ -173,22 +173,22 @@ class UserUpdateSerializer(serializers.ModelSerializer):
             'email',
             'phone_number',
             'country',
-            'profile',
+            'channel',
         )
 
     @staticmethod
-    def _update_profile(profile: Profile, data: Optional[str]) -> None:
+    def _update_channel(channel: Channel, data: Optional[str]) -> None:
         """
         Обновляет данные профиля пользователя.
 
-        :param profile: Объект профиля.
+        :param channel: Объект channel.
         :param data: Данные для обновления.
         """
-        profile_serializer = ProfileUpdateSerializer(
-            instance=profile, data=data, partial=True
+        channel_serializer = ChannelUpdateSerializer(
+            instance=channel, data=data, partial=True
         )
-        profile_serializer.is_valid(raise_exception=True)
-        profile_serializer.save()
+        channel_serializer.is_valid(raise_exception=True)
+        channel_serializer.save()
 
     def update(self, instance: User, validated_data: dict[str, str]) -> User:
         """
@@ -198,13 +198,13 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         :param validated_data: Валидированные данные.
         :return: Обновленный пользователь.
         """
-        profile_data = validated_data.pop('profile') if 'profile' in validated_data else None
+        channel_data = validated_data.pop('channel') if 'channel' in validated_data else None
 
         with transaction.atomic():
             instance = super().update(
                 instance=instance,
                 validated_data=validated_data
             )
-            if profile_data:
-                self._update_profile(instance.profile, profile_data)
+            if channel_data:
+                self._update_channel(instance.channel, channel_data)
         return instance

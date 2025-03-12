@@ -47,8 +47,11 @@ INSTALLED_APPS = [
     'playlist',
     'content',
     'comments',
+    'channel',
 
     # endregion --------------------------------------------------
+    'ckeditor',
+    # 'ckeditor_uploader',
 
     'drf_spectacular',  # всегда указывать после всех других созданных приложений проекта или же в конце
 ]

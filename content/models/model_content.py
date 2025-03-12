@@ -1,6 +1,6 @@
 from datetime import timedelta
 from django.db import models
-from comments.models import Comment, Reaction
+# from comments.models import Reaction
 from common.mixin import InfoMixin
 from common.utils import get_video_duration
 from content.manager import PersonManager
@@ -64,11 +64,11 @@ class VideoContent(InfoMixin):
             return self.preview_image.url
         return None # надо написать автоматическое добавление превью
 
-    def likes_count(self):
-        return self.reactions.filter(reaction_type=Reaction.ReactionChoices.LIKE).count()
-
-    def dislikes_count(self):
-        return self.reactions.filter(reaction_type=Reaction.ReactionChoices.DISLIKE).count()
+    # def likes_count(self):
+    #     return self.reactions.filter(reaction_type=Reaction.ReactionChoices.LIKE).count()
+    #
+    # def dislikes_count(self):
+    #     return self.reactions.filter(reaction_type=Reaction.ReactionChoices.DISLIKE).count()
 
     def save(self, *args, **kwargs):
         """ Автоматическое создание slug и длительности видео """

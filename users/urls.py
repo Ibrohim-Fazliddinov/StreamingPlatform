@@ -32,5 +32,6 @@ urlpatterns = [
     path('auth/jwt/create', CustomTokenObtainPairView.as_view(), name='create-token'),
     path('auth/jwt/refresh', CustomTokenRefreshView.as_view(), name='refresh-token'),
     path('auth/jwt/verify', CustomTokenVerifyView.as_view(), name='verify-token'),
+
     *filtered_user_routes,  # Распаковка отфильтрованных маршрутов
 ]
